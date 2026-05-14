@@ -29,8 +29,42 @@ DM은 물론 그룹 채팅에서도 @멘션으로 사용할 수 있습니다.
 
 1. Telegram에서 `@BotFather` 검색 후 대화 시작
 2. `/newbot` 명령어 입력
+
+   > **BotFather 응답:**
+   > ```
+   > Alright, a new bot. How are we going to call it?
+   > Please choose a name for your bot.
+   > ```
+
 3. Bot 표시 이름 입력 (예: `My Claude Assistant`)
+
+   > **BotFather 응답:**
+   > ```
+   > Good. Now let's choose a username for your bot.
+   > It must end in `bot`. Like this, for example: TetrisBot or tetris_bot.
+   > ```
+
 4. Bot username 입력 — 반드시 `bot`으로 끝나야 함 (예: `myclaudeassistant_bot`)
+
+   > **username이 이미 사용 중인 경우:**
+   > ```
+   > Sorry, this username is already taken. Please try something different.
+   > ```
+   > 다른 username으로 다시 시도하세요.
+
+   > **성공 시 BotFather 응답:**
+   > ```
+   > Done! Congratulations on your new bot. You will find it at t.me/your_bot.
+   > You can now add a description, about section and profile picture for your bot,
+   > see /help for a list of commands.
+   >
+   > Use this token to access the HTTP API:
+   > 1234567890:AAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   >
+   > Keep your token secure and store it safely,
+   > it can be used by anyone to control your bot.
+   > ```
+
 5. 발급된 **Bot Token**을 복사해두기 (외부 유출 금지 ⚠️)
 
 ---
