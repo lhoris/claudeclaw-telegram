@@ -19,15 +19,69 @@ DM은 물론 그룹 채팅에서도 @멘션으로 사용할 수 있습니다.
 
 ## 사전 준비 (Windows)
 
-- [x] [Claude Code CLI](https://claude.ai/code) 설치 완료
-- [x] [Bun](https://bun.sh/) 설치 완료 — Telegram 플러그인은 Bun 런타임 필수 (Node.js 불가)
+- [x] [Claude Code CLI](https://claude.ai/code) 설치 완료 (아래 설치 방법 참고)
 - [x] [Telegram Desktop](https://desktop.telegram.org/) 설치 완료
 - [ ] Telegram Bot 생성 (아래 1단계 참고)
 
-> **Bun 설치 방법 (Windows PowerShell):**
-> ```powershell
-> powershell -c "irm bun.sh/install.ps1 | iex"
+### Claude Code 설치 방법
+
+두 가지 방법 중 하나를 선택하세요.
+
+#### 방법 A. Native Installer (권장)
+
+Windows PowerShell에서 실행:
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+| 장점 | 설명 |
+|---|---|
+| 자동 업데이트 | 새 버전 출시 시 자동으로 업데이트 |
+| 추가 설치 불필요 | Node.js, Bun 별도 설치 없이 바로 사용 가능 |
+| 빠른 실행 | 네이티브 바이너리로 실행 속도 빠름 |
+
+#### 방법 B. npm 설치
+
+Node.js가 이미 설치된 경우:
+
+```bash
+npm install -g @anthropic-ai/claude-code@latest
+```
+
+> ⚠️ **주의사항:**
+> - 자동 업데이트 미지원 — 업그레이드 시 수동으로 재설치 필요
+> - Telegram 플러그인 사용을 위해 [Bun](https://bun.sh/)을 별도로 설치해야 함
+> - Bun 설치: `powershell -c "irm bun.sh/install.ps1 | iex"`
+
+> **npm 업그레이드 시 ENOTEMPTY 오류 발생하면:**
+> ```bash
+> npm uninstall -g @anthropic-ai/claude-code
+> npm cache clean --force
+> npm install -g @anthropic-ai/claude-code@latest
 > ```
+
+### 설치 확인
+
+```bash
+claude --version
+```
+
+---
+
+## 단계별 역할 구분
+
+| 단계 | 담당 | 설명 |
+|---|---|---|
+| 1단계: Bot 생성 | 👤 사용자 | Telegram 앱에서 BotFather와 직접 대화 |
+| 2단계: 플러그인 설치 | 🤖 Claude 가능 | `/plugin install` 명령 실행 |
+| 3단계: 토큰 설정 | 🤖 Claude 가능 | `/telegram:configure <토큰>` 실행 |
+| 4단계: 재시작 | 👤 사용자 | `--channels` 플래그로 Claude Code 재실행 필요 |
+| 5단계: 페어링 코드 받기 | 👤 사용자 | Telegram에서 봇에게 `/start` 전송 |
+| 5단계: 페어링 승인 | 🤖 Claude 가능 | `/telegram:access pair <코드>` 실행 |
+| 6단계: 보안 설정 | 🤖 Claude 가능 | `/telegram:access policy allowlist` 실행 |
+
+> **핵심:** 4단계 `--channels` 플래그 재시작은 Claude가 자신의 세션을 재시작할 수 없으므로 반드시 사용자가 직접 해야 합니다.
 
 ---
 
@@ -75,25 +129,59 @@ DM은 물론 그룹 채팅에서도 @멘션으로 사용할 수 있습니다.
 
 ---
 
-## 2단계: Claude Code에서 Telegram 플러그인 설정
+## 2단계: Telegram 플러그인 설치
 
 Claude Code CLI 터미널에서 아래 명령어 실행:
 
 ```
-/telegram:configure
+/plugin install telegram@claude-plugins-official
 ```
 
-- 1단계에서 발급받은 **Bot Token** 입력
-- Access Policy(접근 정책) 선택:
-  - `pairing` — 요청할 때마다 코드로 승인 (기본값)
-  - `allowlist` — 미리 등록된 사용자만 접근 가능
-  - `disabled` — 채널 비활성화
+설치가 완료되면 `/telegram` 관련 명령어가 활성화됩니다.
 
 ---
 
-## 3단계: 봇 페어링 (DM 연동)
+## 3단계: Bot Token 설정
 
-1. Telegram에서 내 봇에게 아무 메시지나 전송
+Claude Code CLI 터미널에서 1단계에서 발급받은 Token을 인수로 넘겨 실행:
+
+```
+/telegram:configure <발급받은_토큰>
+```
+
+예시:
+```
+/telegram:configure 1234567890:AAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+설정 확인은 인수 없이 실행:
+```
+/telegram:configure
+```
+
+Access Policy(접근 정책):
+- `pairing` — 요청할 때마다 코드로 승인 (기본값)
+- `allowlist` — 미리 등록된 사용자만 접근 가능 (보안상 권장)
+- `disabled` — 채널 비활성화
+
+---
+
+## 4단계: Channels 플래그로 Claude Code 실행
+
+기존 Claude Code 세션을 종료하고, 아래 명령어로 재시작:
+
+```bash
+claude --channels plugin:telegram@claude-plugins-official
+```
+
+> ⚠️ 이 명령어로 실행된 Claude Code 터미널 창을 **닫으면 Telegram 연동이 끊깁니다.**  
+> Telegram으로 Claude를 사용하는 동안에는 이 창을 유지해야 합니다.
+
+---
+
+## 5단계: 봇 페어링 (DM 연동)
+
+1. Telegram에서 내 봇에게 `/start` 전송
 2. 봇이 **6자리 페어링 코드** 반환
 3. Claude Code 터미널에서 아래 명령어 실행:
 
@@ -105,13 +193,23 @@ Claude Code CLI 터미널에서 아래 명령어 실행:
 
 ---
 
-## 4단계: 그룹 채팅 연동 (선택)
+## 6단계: 보안 설정 (권장)
 
-### 4-1. 봇을 그룹에 초대
+나만 사용할 경우, allowlist 정책으로 변경해 타인의 접근을 차단하세요:
+
+```
+/telegram:access policy allowlist
+```
+
+---
+
+## 7단계: 그룹 채팅 연동 (선택)
+
+### 7-1. 봇을 그룹에 초대
 
 Telegram 그룹 채팅방에 내 봇을 멤버로 추가합니다.
 
-### 4-2. BotFather에서 Group Privacy 비활성화
+### 7-2. BotFather에서 Group Privacy 비활성화
 
 ```
 @BotFather → /mybots → 봇 선택 → Bot Settings → Group Privacy → Disable
@@ -120,7 +218,7 @@ Telegram 그룹 채팅방에 내 봇을 멤버로 추가합니다.
 > ⚠️ 기본 설정(Enabled)이면 봇이 그룹 메시지를 읽지 못합니다.  
 > 변경 후 봇을 그룹에서 내보냈다가 다시 초대해야 적용될 수 있습니다.
 
-### 4-3. 그룹 ID 확인 및 등록
+### 7-3. 그룹 ID 확인 및 등록
 
 그룹 ID를 확인한 뒤 Claude Code 터미널에서 실행:
 
@@ -128,15 +226,28 @@ Telegram 그룹 채팅방에 내 봇을 멤버로 추가합니다.
 /telegram:access group add <그룹ID>
 ```
 
-> 그룹 ID는 음수(`-`)로 시작하는 숫자입니다. `@userinfobot`으로 확인할 수 있어요.
+> **그룹 ID 확인 방법:**
+> 1. 그룹 채팅에서 아무 메시지나 선택
+> 2. `@userinfobot`에게 해당 메시지를 포워딩
+> 3. userinfobot이 Chat ID를 알려줌 — 음수(`-`)로 시작하는 숫자가 그룹 ID
+>
+> 그룹에 봇을 초대할 필요 없이 포워딩만으로 확인 가능합니다.
 
-### 4-4. 그룹에서 사용
+### 7-4. 그룹에서 사용 — @멘션에만 응답하게 하기
 
-그룹 채팅에서 봇을 **@멘션**하면 Claude가 응답합니다.
+Group Privacy를 비활성화하면 봇이 그룹 내 모든 메시지를 읽을 수 있지만,  
+**플러그인은 @멘션된 메시지에만 응답**합니다.
 
 ```
 @봇이름 안녕하세요!
 ```
+
+@멘션 없이 보낸 메시지에는 응답하지 않으므로, 일반 대화를 방해하지 않습니다.
+
+> **멘션 응답이 작동하지 않을 때 확인 사항:**
+> - BotFather에서 Group Privacy가 Disable로 설정되어 있는지 확인
+> - 비활성화 후 봇을 그룹에서 내보냈다가 다시 초대했는지 확인
+> - `claude --channels plugin:telegram@claude-plugins-official` 로 실행 중인지 확인
 
 ---
 
