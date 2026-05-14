@@ -20,8 +20,14 @@ DM은 물론 그룹 채팅에서도 @멘션으로 사용할 수 있습니다.
 ## 사전 준비 (Windows)
 
 - [x] [Claude Code CLI](https://claude.ai/code) 설치 완료
+- [x] [Bun](https://bun.sh/) 설치 완료 — Telegram 플러그인은 Bun 런타임 필수 (Node.js 불가)
 - [x] [Telegram Desktop](https://desktop.telegram.org/) 설치 완료
 - [ ] Telegram Bot 생성 (아래 1단계 참고)
+
+> **Bun 설치 방법 (Windows PowerShell):**
+> ```powershell
+> powershell -c "irm bun.sh/install.ps1 | iex"
+> ```
 
 ---
 
